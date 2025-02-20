@@ -11,4 +11,7 @@ public class UsageUserPlans
     public string Date { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public static string MapDate(DateTime date)
+      => $"{date.Year}-{date.Month}";
 }

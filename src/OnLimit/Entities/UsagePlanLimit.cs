@@ -6,4 +6,5 @@ public record UsagePlanItem<T>(
   ) where T : notnull, new()
 {
     public UsagePlanItem() : this("", new T()) { }
+    public UsagePlanItem(string plan) : this(plan, new T()) { }
 }

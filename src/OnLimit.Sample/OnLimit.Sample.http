@@ -1,0 +1,6 @@
+@OnLimit.Sample_HostAddress = http://localhost:5156
+
+GET {{OnLimit.Sample_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
