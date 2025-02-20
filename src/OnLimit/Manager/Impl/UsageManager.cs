@@ -33,11 +33,16 @@ public class UsageManager<T>(
         await usageRepository.SetPlan(orgId, plan, at);
     }
 
-    private Exception? Process(DateTime? at, LimitItemMetadata order, IDictionary<string, long> plan)
+    private Exception? Process(
+        DateTime? at,
+        LimitItemMetadata order,
+        IDictionary<string, long> plan,
+        long? consumition
+        )
     {
         var requetedCount = order.Count;
 
-        var requiredAmmount = requetedCount + order.Used;
+        var requiredAmmount = requetedCount + (consumition ?? order.Used);
 
         var field = order.FieldName;
         var planLimit = plan[field];
@@ -53,6 +58,8 @@ public class UsageManager<T>(
     public async Task Usage(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null)
     {
         var now = at ?? DateTime.UtcNow;
+
+        Dictionary<string, long>? consumition = null;
 
         var actualPlan = await GetActualPlan(Id, now);
 
@@ -76,17 +83,26 @@ public class UsageManager<T>(
             throw new ArgumentException($"Plan {targetPlan} not found");
         }
 
-        var limitFields = exprs.Select(GetFieldName).ToList();
+        var limitFields = exprs
+          .Select(GetFieldName)
+          .ToList();
 
-        foreach (var c in limitFields.Where(x => x.IsIncremental is true))
+        var incrementalLimitFields = limitFields
+          .Where(x => x.IsIncremental is true)
+          .ToList();
+
+        if (incrementalLimitFields.Count is not 0)
         {
-            // logger.LogInformation("Credits: {Credits}", c.FieldName);
+            consumition = await usageRepository.GetConsumition(Id, now);
         }
 
         var res = limitFields.Select(x => Process(
             at: at,
             order: x,
-            plan: plan
+            plan: plan,
+            consumition: consumition is null
+            ? null
+            : (consumition.TryGetValue(x.FieldName, out var value) ? value : null)
         ));
 
         var failedItems = res

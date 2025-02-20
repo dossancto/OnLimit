@@ -2,7 +2,7 @@ using OnLimit.Entities;
 
 namespace OnLimit.Tests.Unit.Manager.Usage;
 
-internal class MyPlan
+public class MyPlan
 {
     public long Users { get; set; }
 }
