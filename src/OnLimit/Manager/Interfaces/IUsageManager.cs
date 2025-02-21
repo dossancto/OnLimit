@@ -11,7 +11,8 @@ public interface IUsageManager<T> where T : notnull, new()
 
     Task SetPlan(string orgId, string plan, DateTime? at = null);
 
-    Task Consume(ConsumeUsageInput<T> input);
+    Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null
+);
 
     UsagePlanItem<T>[] ListPlans();
 }

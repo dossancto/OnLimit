@@ -154,12 +154,12 @@ public class UsageManager<T>(
         };
     }
 
-    public async Task Consume(ConsumeUsageInput<T> input)
+    public async Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null)
     {
         var items = new IncrementUsageInput(
-               Id: input.UserId,
+               Id: UserId,
 
-               Items: input.Items
+               Items: Items
                .Select(x =>
                {
                    var (member, propertyInfo) = GetMemberExpression(x.expr);
@@ -174,7 +174,7 @@ public class UsageManager<T>(
                  x.IncrementBy
                  )).ToList(),
 
-               At: input.At
+               At: At
          );
 
         if (items.Items.Count is 0)

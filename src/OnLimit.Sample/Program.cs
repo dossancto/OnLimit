@@ -24,10 +24,18 @@ builder.Services
         Values = [
           new("FREE")
           {
-          // TODO: Remove to "Limit"
             Limit = new()
             {
                 Tokens = 1000,
+                Users = 10
+            }
+          },
+
+          new("PREMIUM")
+          {
+            Limit = new()
+            {
+                Tokens = 5000,
                 Users = 10
             }
           }
@@ -48,6 +56,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapGet("/set-plan", async (
+      [FromQuery] string plan,
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    await usageManager.SetPlan("123", plan);
+
+    return "ok";
+});
+
 app.MapGet("/plans", (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
@@ -59,13 +77,13 @@ app.MapGet("/inc", async (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
 {
-    await usageManager.Consume(new(
+    await usageManager.Consume(
           "123",
           [
             new(x => x.Tokens, 200),
             new(x => x.Users, 2),
           ]
-          ));
+);
 
     return "ok";
 });
@@ -78,6 +96,11 @@ app.MapGet("/consume", async (
     await usageManager.Usage("123", [
         new(x => x.Tokens, 500)
     ]);
+
+    await usageManager.Consume("123", [
+        new(x => x.Tokens, 500)
+    ]);
+
 
     return "ok";
 });
