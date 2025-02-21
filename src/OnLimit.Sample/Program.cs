@@ -27,7 +27,8 @@ builder.Services
             Limit = new()
             {
                 Tokens = 1000,
-                Users = 10
+                Users = 10,
+                CanUse = false
             }
           },
 
@@ -36,6 +37,7 @@ builder.Services
             Limit = new()
             {
                 Tokens = 5000,
+                CanUse = true,
                 Users = 10
             }
           }
@@ -94,7 +96,8 @@ app.MapGet("/consume", async (
       ) =>
 {
     await usageManager.Usage("123", [
-        new(x => x.Tokens, 500)
+        new(x => x.Tokens, 500),
+        new(x => x.CanUse),
     ]);
 
     await usageManager.Consume("123", [
@@ -114,5 +117,6 @@ class MyPlan
     [IncrementalUsageLimit]
     public long Tokens { get; set; }
 
+    [UsageSwitch]
     public bool CanUse { get; set; }
 }

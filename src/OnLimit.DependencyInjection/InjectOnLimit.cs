@@ -28,22 +28,23 @@ public static class InjectOnLimit
         return new(services);
     }
 
-    private static IDictionary<string, long> ToDictionary(this object source)
+    private static IDictionary<string, object> ToDictionary(this object source)
     {
         if (source == null)
         {
             throw new ArgumentNullException(nameof(source));
         }
 
-        var dictionary = new Dictionary<string, long>();
+        var dictionary = new Dictionary<string, object>();
         var properties = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach (var property in properties)
         {
             var value = property.GetValue(source);
-
-            var a = value as long? ?? 0;
-            dictionary.Add(property.Name, a);
+            
+            if(value is null) continue;
+            
+            dictionary.Add(property.Name, value);
         }
 
         return dictionary;

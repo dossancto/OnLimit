@@ -36,10 +36,11 @@ public class UsageManager<T>(
     private Exception? Process(
         DateTime? at,
         LimitItemMetadata order,
-        IDictionary<string, long> plan,
+        IDictionary<string, object> plan,
         long? consumition
         )
     {
+
         var requetedCount = order.Count;
 
         var requiredAmmount = requetedCount + (consumition ?? order.Used);
@@ -47,10 +48,25 @@ public class UsageManager<T>(
         var field = order.FieldName;
         var planLimit = plan[field];
 
-        if (planLimit < requiredAmmount)
+        if (planLimit is long planLimitLong)
         {
-            return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+            if (planLimitLong < requiredAmmount)
+            {
+                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+            }
         }
+        else if (planLimit is bool planLimitBool)
+        {
+            if (planLimitBool is false)
+            {
+                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+            }
+        }
+        else
+        {
+            throw new("OLHA O ROJAO");
+        }
+
 
         return null;
     }
@@ -143,13 +159,16 @@ public class UsageManager<T>(
         var fieldName = member.Member.Name;
 
         var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>();
+        var usageSwitch = propertyInfo.GetCustomAttribute<UsageSwitchAttribute>();
 
         return new(
-                fieldName,
-                incrementalUsage is not null
+                FieldName: fieldName,
+                IsIncremental: incrementalUsage is not null,
+                IsUsageSwitch: usageSwitch is not null
             )
         {
             Count = item.Count,
+            Enabled = item.Enabled,
             Used = item.Used
         };
     }

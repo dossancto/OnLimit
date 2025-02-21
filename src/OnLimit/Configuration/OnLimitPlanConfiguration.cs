@@ -11,5 +11,5 @@ public record PlanConfig<T>(
 public record UsagePlanItemDict
 (
     string Plan,
-    IDictionary<string, long> Value
+    IDictionary<string, object> Value
 );
