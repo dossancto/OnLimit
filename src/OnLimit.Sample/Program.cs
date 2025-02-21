@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using OnLimit;
 using OnLimit.DependencyInjection;
 using OnLimit.Interfaces;
 using OnLimit.MongoDB;
@@ -26,6 +27,7 @@ builder.Services
           // TODO: Remove to "Limit"
             Value = new()
             {
+                Tokens = 1000,
                 Users = 10
             }
           }
@@ -46,11 +48,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapGet("/plans", (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
@@ -58,41 +55,41 @@ app.MapGet("/plans", (
     return usageManager.ListPlans();
 });
 
+app.MapGet("/inc", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    await usageManager.Consume(new(
+          "123",
+          [
+            new(x => x.Tokens, 200),
+            new(x => x.Users, 2),
+          ]
+          ));
+
+    return "ok";
+});
+
+
 app.MapGet("/consume", async (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
 {
     await usageManager.Usage("123", [
-        new(x => x.CanUse, 0)
+        new(x => x.Tokens, 500)
     ]);
 
     return "ok";
 });
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
 
 class MyPlan
 {
     public long Users { get; set; }
+
+    [IncrementalUsageLimit]
+    public long Tokens { get; set; }
+
     public bool CanUse { get; set; }
 }

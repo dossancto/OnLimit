@@ -116,10 +116,8 @@ public class UsageManager<T>(
         }
     }
 
-    private LimitItemMetadata GetFieldName(CheckPlanUsageInput<T> item)
+    private (MemberExpression Member, PropertyInfo Property) GetMemberExpression(Expression<Func<T, object>> expression)
     {
-        var expression = item.expr;
-
         var member = expression.Body as MemberExpression ??
                      (expression.Body as UnaryExpression)?.Operand as MemberExpression;
 
@@ -135,6 +133,13 @@ public class UsageManager<T>(
             throw new ArgumentException("The lambda expression 'propertyLambda' should point to a valid Property");
         }
 
+        return (member, propertyInfo);
+    }
+
+    private LimitItemMetadata GetFieldName(CheckPlanUsageInput<T> item)
+    {
+        var (member, propertyInfo) = GetMemberExpression(item.expr);
+
         var fieldName = member.Member.Name;
 
         var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>();
@@ -148,4 +153,16 @@ public class UsageManager<T>(
             Used = item.Used
         };
     }
+
+    public Task Consume(ConsumeUsageInput<T> input)
+      => usageRepository.Increment(new(
+            Id: input.UserId,
+
+            Items: input.Items.Select(x => new IncrementUsageInput.ItemDto(
+                GetMemberExpression(x.expr).Member.Member.Name,
+                x.IncrementBy
+                )).ToList(),
+
+            At: input.At
+            ));
 }
