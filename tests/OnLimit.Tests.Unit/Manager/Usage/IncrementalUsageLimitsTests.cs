@@ -35,7 +35,7 @@ public class IncrementalUsageLimitsTests
             FallbackPlan: "FREE",
             PlanDict: [
               new("FREE",
-                  new Dictionary<string, long>()
+                new Dictionary<string, object>()
                   {
                     ["Tokens"] = 10
                   }
@@ -83,7 +83,7 @@ public class IncrementalUsageLimitsTests
             FallbackPlan: "FREE",
             PlanDict: [
               new("FREE",
-                  new Dictionary<string, long>()
+                new Dictionary<string, object>()
                   {
                     ["Tokens"] = 10
                   }
@@ -132,7 +132,7 @@ public class IncrementalUsageLimitsTests
             FallbackPlan: "FREE",
             PlanDict: [
               new("FREE",
-                  new Dictionary<string, long>()
+                new Dictionary<string, object>()
                   {
                     ["Tokens"] = 10
                   }

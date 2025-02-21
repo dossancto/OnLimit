@@ -48,9 +48,18 @@ public class UsageManager<T>(
         var field = order.FieldName;
         var planLimit = plan[field];
 
+        // Make "the same" for other types. Like double, decimal, short etc
+        // Maybe even Enum
         if (planLimit is long planLimitLong)
         {
             if (planLimitLong < requiredAmmount)
+            {
+                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+            }
+        }
+        else if (planLimit is int planLimitInt)
+        {
+            if (planLimitInt < requiredAmmount)
             {
                 return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
             }
@@ -64,7 +73,7 @@ public class UsageManager<T>(
         }
         else
         {
-            throw new("OLHA O ROJAO");
+            throw new($"OLHA O ROJAO {planLimit.GetType()}");
         }
 
 

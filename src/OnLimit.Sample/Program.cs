@@ -75,27 +75,14 @@ app.MapGet("/plans", (
     return usageManager.ListPlans();
 });
 
-app.MapGet("/inc", async (
-      [FromServices] IUsageManager<MyPlan> usageManager
-      ) =>
-{
-    await usageManager.Consume(
-          "123",
-          [
-            new(x => x.Tokens, 200),
-            new(x => x.Users, 2),
-          ]
-);
-
-    return "ok";
-});
-
-
 app.MapGet("/consume", async (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
 {
+    var actualUsers = 123;
+
     await usageManager.Usage("123", [
+        new(x => x.Users, Count: 500, Used: actualUsers),
         new(x => x.Tokens, 500),
         new(x => x.CanUse),
     ]);
@@ -120,3 +107,7 @@ class MyPlan
     [UsageSwitch]
     public bool CanUse { get; set; }
 }
+
+
+
+

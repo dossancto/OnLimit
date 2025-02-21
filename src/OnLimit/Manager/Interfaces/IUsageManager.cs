@@ -11,16 +11,7 @@ public interface IUsageManager<T> where T : notnull, new()
 
     Task SetPlan(string orgId, string plan, DateTime? at = null);
 
-    Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null
-);
+    Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null);
 
     UsagePlanItem<T>[] ListPlans();
-}
-
-public record PlanConsumitionItem(
-    long value,
-    bool Credits = false
-    )
-{
-    public PlanConsumitionItem() : this(0, false) { }
 }

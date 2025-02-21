@@ -25,7 +25,7 @@ public class SimpleUsageTests
             FallbackPlan: "FREE",
             PlanDict: [
             new("FREE",
-                new Dictionary<string, long>()
+                new Dictionary<string, object>()
                 {
                   ["Users"] = 10
                 }
@@ -62,7 +62,7 @@ public class SimpleUsageTests
             FallbackPlan: "FREE",
             PlanDict: [
             new("FREE",
-                new Dictionary<string, long>()
+                new Dictionary<string, object>()
                 {
                   ["Users"] = 10
                 }
@@ -103,7 +103,7 @@ public class SimpleUsageTests
             FallbackPlan: "FREE",
             PlanDict: [
             new("FREE",
-                new Dictionary<string, long>()
+                new Dictionary<string, object>()
                 {
                   ["Users"] = 10
                 }
