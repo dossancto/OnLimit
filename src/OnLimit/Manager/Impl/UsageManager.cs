@@ -154,15 +154,34 @@ public class UsageManager<T>(
         };
     }
 
-    public Task Consume(ConsumeUsageInput<T> input)
-      => usageRepository.Increment(new(
-            Id: input.UserId,
+    public async Task Consume(ConsumeUsageInput<T> input)
+    {
+        var items = new IncrementUsageInput(
+               Id: input.UserId,
 
-            Items: input.Items.Select(x => new IncrementUsageInput.ItemDto(
-                GetMemberExpression(x.expr).Member.Member.Name,
-                x.IncrementBy
-                )).ToList(),
+               Items: input.Items
+               .Select(x =>
+               {
+                   var (member, propertyInfo) = GetMemberExpression(x.expr);
 
-            At: input.At
-            ));
+                   var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>() is not null;
+
+                   return (x.IncrementBy, member, incrementalUsage);
+               })
+               .Where(x => x.incrementalUsage is true)
+               .Select(x => new IncrementUsageInput.ItemDto(
+                 x.member.Member.Name,
+                 x.IncrementBy
+                 )).ToList(),
+
+               At: input.At
+         );
+
+        if (items.Items.Count is 0)
+        {
+            return;
+        }
+
+        await usageRepository.Increment(items);
+    }
 }
