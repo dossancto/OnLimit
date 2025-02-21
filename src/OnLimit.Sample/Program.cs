@@ -25,7 +25,7 @@ builder.Services
           new("FREE")
           {
           // TODO: Remove to "Limit"
-            Value = new()
+            Limit = new()
             {
                 Tokens = 1000,
                 Users = 10

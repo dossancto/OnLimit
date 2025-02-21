@@ -16,7 +16,7 @@ public static class InjectOnLimit
         var FallbackPlan = config.FallbackPlan ?? config.Values.First().Plan;
 
         var itemsAsDict = config.Values
-            .Select(x => new UsagePlanItemDict(x.Plan, x.Value.ToDictionary()))
+            .Select(x => new UsagePlanItemDict(x.Plan, x.Limit.ToDictionary()))
             .ToArray();
 
         var c = new PlanConfig<T>(FallbackPlan, itemsAsDict, config.Values);
