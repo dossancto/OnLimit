@@ -16,7 +16,7 @@ public class UsageManager<T>(
     private readonly PlanConfig<T> config = config;
 
     public Task<UsageUserPlans?> GetActualPlan(string Id, DateTime? at = null)
-    => usageRepository.GetLatestUserPlan(Id, at);
+    => usageRepository.GetCurrentPlan(Id, at);
 
     public UsagePlanItem<T>[] ListPlans()
     => config.Plan;
@@ -152,9 +152,11 @@ public class UsageManager<T>(
         }
         else
         {
-            targetPlan = config.FallbackPlan;
+            var lastPlan = await usageRepository.GetLatestUserPlan(Id);
 
-            await SetPlan(Id, config.FallbackPlan);
+            targetPlan = lastPlan?.Plan ?? config.FallbackPlan;
+
+            await SetPlan(Id, targetPlan);
         }
 
         var plan = config.PlanDict.FirstOrDefault(x => x.Plan == targetPlan)?.Value;

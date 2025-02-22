@@ -52,7 +52,7 @@ public class MongoUsageRepository(
             ) ?? new();
     }
 
-    public async Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null)
+    public async Task<UsageUserPlans?> GetCurrentPlan(string Id, DateTime? at = null)
     {
         var now = at ?? DateTime.Now;
 
@@ -64,6 +64,21 @@ public class MongoUsageRepository(
         .Eq(x => x.UserId, Id)
             & f.Eq(x => x.Date, date);
         ;
+
+        var result = await LinkCollection
+        .Find(filter)
+        .SortByDescending(x => x.CreatedAt)
+        .FirstOrDefaultAsync()
+        ;
+
+        return result;
+    }
+
+    public async Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null)
+    {
+        var f = Builders<UsageUserPlans>.Filter;
+
+        var filter = f.Eq(x => x.UserId, Id);
 
         var result = await LinkCollection
         .Find(filter)

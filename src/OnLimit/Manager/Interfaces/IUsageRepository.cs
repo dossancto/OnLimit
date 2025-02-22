@@ -9,6 +9,8 @@ public interface IUsageRepository
 
     Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null);
 
+    Task<UsageUserPlans?> GetCurrentPlan(string Id, DateTime? at = null);
+
     Task<Dictionary<string, long>> GetConsumition(string orgId, DateTime at);
 
     Task Increment(IncrementUsageInput input);
