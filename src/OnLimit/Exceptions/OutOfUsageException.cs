@@ -9,7 +9,7 @@ public class OutOfUsageException(params OutOfUsageException.OutOfUsageItem[] ite
         string Plan,
         string Field,
         long Requested = 0,
-        long Limit = 0,
+        object Limit = default!,
         long Used = 0,
         bool IsIncremental = false,
         bool IsUsageSwitch = false
