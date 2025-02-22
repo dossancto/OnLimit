@@ -108,3 +108,9 @@ app.MapGet("/consume", async (
 ```
 
 - After checking the usage, you can consume the resources, incrementing the usage count. Only fields with `[IncrementalUsageLimit]` can be incremented.
+
+```cs
+await usageManager.Consume(myUserId, [
+    new(x => x.Tokens, 500)
+]);
+```
