@@ -99,13 +99,20 @@ public class IncrementalUsageLimitsTests
 
         var manager = new UsageManager<IncrementalPlan>(usageRepositoy, config);
 
-        var ex = await Assert.ThrowsAsync<AggregateException>(() => manager.Usage("my org id", [
+        var ex = await manager.Usage("my org id", [
             new(x => x.Tokens, 5)
-        ]));
+        ]);
 
         ex.ShouldNotBeNull();
 
         await usageRepositoy.Received(1).GetConsumition(Arg.Any<string>(), Arg.Any<DateTime>());
+
+        ex.Items.ShouldHaveSingleItem();
+        ex.Items.First().Field.ShouldBe(nameof(IncrementalPlan.Tokens));
+        ex.Items.First().Limit.ShouldBe(10);
+        ex.Items.First().Requested.ShouldBe(14);
+        ex.Items.First().IsIncremental.ShouldBe(true);
+        ex.Items.First().IsUsageSwitch.ShouldBe(false);
     }
 
     [Fact]

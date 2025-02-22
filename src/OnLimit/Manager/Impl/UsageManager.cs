@@ -33,11 +33,12 @@ public class UsageManager<T>(
         await usageRepository.SetPlan(orgId, plan, at);
     }
 
-    private Exception? Process(
+    private OutOfUsageException.OutOfUsageItem? Process(
         DateTime? at,
         LimitItemMetadata order,
         IDictionary<string, object> plan,
-        long? consumition
+        long? consumition,
+        string planName
         )
     {
 
@@ -48,27 +49,52 @@ public class UsageManager<T>(
         var field = order.FieldName;
         var planLimit = plan[field];
 
+        // TODO:
         // Make "the same" for other types. Like double, decimal, short etc
         // Maybe even Enum
         if (planLimit is long planLimitLong)
         {
             if (planLimitLong < requiredAmmount)
             {
-                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+                return new(
+                    Plan: planName,
+                    Field: field
+                    )
+                {
+                    Requested = requiredAmmount,
+                    Limit = planLimitLong,
+                    Used = order.Used
+                };
             }
         }
         else if (planLimit is int planLimitInt)
         {
             if (planLimitInt < requiredAmmount)
             {
-                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+                return new(
+                    Plan: planName,
+                    Field: field
+                    )
+                {
+                    Requested = requiredAmmount,
+                    Limit = planLimitInt,
+                    IsIncremental = order.IsIncremental,
+                    Used = order.Used
+                };
             }
         }
         else if (planLimit is bool planLimitBool)
         {
             if (planLimitBool is false)
             {
-                return new($"Invalid Usage for {field} on plan . Requested: {requiredAmmount}, Limit: {planLimit}");
+                return new(
+                    Plan: planName,
+                    Field: field
+                    )
+                {
+                    Requested = requiredAmmount,
+                    IsUsageSwitch = true
+                };
             }
         }
         else
@@ -80,7 +106,7 @@ public class UsageManager<T>(
         return null;
     }
 
-    public async Task Usage(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null)
+    public async Task<OutOfUsageException?> Usage(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null)
     {
         var now = at ?? DateTime.UtcNow;
 
@@ -127,18 +153,20 @@ public class UsageManager<T>(
             plan: plan,
             consumition: consumition is null
             ? null
-            : (consumition.TryGetValue(x.FieldName, out var value) ? value : null)
+            : (consumition.TryGetValue(x.FieldName, out var value) ? value : null),
+            planName: targetPlan
         ));
 
         var failedItems = res
                         .Where(x => x is not null)
-                        .Cast<Exception>()
                         .ToArray();
 
         if (failedItems.Any())
         {
-            throw new AggregateException(failedItems);
+            return new OutOfUsageException(failedItems!);
         }
+
+        return null;
     }
 
     private (MemberExpression Member, PropertyInfo Property) GetMemberExpression(Expression<Func<T, object>> expression)
@@ -211,5 +239,15 @@ public class UsageManager<T>(
         }
 
         await usageRepository.Increment(items);
+    }
+
+    public async Task UsageAndThrow(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null)
+    {
+        var usage = await Usage(Id, exprs, at);
+
+        if (usage is not null)
+        {
+            throw usage;
+        }
     }
 }

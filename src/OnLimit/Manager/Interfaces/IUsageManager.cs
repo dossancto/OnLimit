@@ -5,7 +5,8 @@ namespace OnLimit.Interfaces;
 
 public interface IUsageManager<T> where T : notnull, new()
 {
-    Task Usage(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null);
+    Task<OutOfUsageException?> Usage(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null);
+    Task UsageAndThrow(string Id, CheckPlanUsageInput<T>[] exprs, DateTime? at = null);
 
     Task<UsageUserPlans?> GetActualPlan(string Id, DateTime? at = null);
 

@@ -78,11 +78,18 @@ public class SimpleUsageTests
 
         var manager = new UsageManager<MyPlan>(usageRepositoy, config);
 
-        var ex = await Assert.ThrowsAsync<AggregateException>(() => manager.Usage("my org id", [
+        var ex = await manager.Usage("my org id", [
             new(x => x.Users, 11)
-        ]));
+        ]);
 
         ex.ShouldNotBeNull();
+
+        ex.Items.ShouldHaveSingleItem();
+        ex.Items.First().Field.ShouldBe("Users");
+        ex.Items.First().Limit.ShouldBe(10);
+        ex.Items.First().Requested.ShouldBe(11);
+        ex.Items.First().IsIncremental.ShouldBe(false);
+        ex.Items.First().IsUsageSwitch.ShouldBe(false);
     }
 
     [Fact]

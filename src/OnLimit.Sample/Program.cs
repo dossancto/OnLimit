@@ -91,7 +91,6 @@ app.MapGet("/consume", async (
         new(x => x.Tokens, 500)
     ]);
 
-
     return "ok";
 });
 
@@ -107,7 +106,3 @@ class MyPlan
     [UsageSwitch]
     public bool CanUse { get; set; }
 }
-
-
-
-
