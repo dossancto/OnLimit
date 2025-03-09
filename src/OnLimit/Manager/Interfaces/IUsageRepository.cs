@@ -20,6 +20,13 @@ public interface IUsageRepository
     Task<UsageUserPlans?> GetLatestUserPlan(string Id);
 
     /// <summarry>
+    /// Get the latest plan set on a Configuration Table
+    /// </summarry>
+    /// <param name="Id">User id as key</param>
+    [Obsolete("Use GetLatestUserPlan instead")]
+    Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null);
+
+    /// <summarry>
     /// Get the current plan set on a Configuration Table.
     /// </summarry>
     /// <param name="Id">User id as key</param>
