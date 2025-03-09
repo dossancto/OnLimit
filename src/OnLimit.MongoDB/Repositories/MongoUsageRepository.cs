@@ -74,7 +74,7 @@ public class MongoUsageRepository(
         return result;
     }
 
-    public async Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null)
+    public async Task<UsageUserPlans?> GetLatestUserPlan(string Id)
     {
         var f = Builders<UsageUserPlans>.Filter;
 
