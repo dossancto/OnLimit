@@ -44,7 +44,8 @@ public class UsageManager<T>(
 
         var requetedCount = order.Count;
 
-        var requiredAmmount = requetedCount + (consumition ?? order.Used);
+        var used = consumition ?? order.Used;
+        var requiredAmmount = requetedCount + used;
 
         var field = order.FieldName;
         var planLimit = plan[field];
@@ -60,7 +61,7 @@ public class UsageManager<T>(
                 {
                     Requested = requiredAmmount,
                     Limit = planLimitLong,
-                    Used = order.Used
+                    Used = used
                 };
             }
         }
@@ -77,7 +78,7 @@ public class UsageManager<T>(
                     Requested = requiredAmmount,
                     Limit = planLimitDecimal,
                     IsIncremental = order.IsIncremental,
-                    Used = order.Used
+                    Used = used
                 };
             }
         }
@@ -93,7 +94,7 @@ public class UsageManager<T>(
                     Requested = requiredAmmount,
                     Limit = planLimitDouble,
                     IsIncremental = order.IsIncremental,
-                    Used = order.Used
+                    Used = used
                 };
             }
         }
@@ -109,7 +110,7 @@ public class UsageManager<T>(
                     Requested = requiredAmmount,
                     Limit = planLimitInt,
                     IsIncremental = order.IsIncremental,
-                    Used = order.Used
+                    Used = used
                 };
             }
         }
