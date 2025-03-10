@@ -10,6 +10,8 @@ public interface IUsageManager<T> where T : notnull, new()
 
     Task<UsageUserPlans?> GetActualPlan(string Id, DateTime? at = null);
 
+    Task<Dictionary<string, long>> GetConsumition(string Id, DateTime? at = null);
+
     Task SetPlan(string orgId, string plan, DateTime? at = null);
 
     Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null);

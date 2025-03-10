@@ -183,9 +183,7 @@ public class UsageManager<T>(
             at: at,
             order: x,
             plan: plan,
-            consumition: consumition is null
-            ? null
-            : (consumition.TryGetValue(x.FieldName, out var value) ? value : null),
+            consumition: consumition?.GetValueOrDefault(x.FieldName),
             planName: targetPlan
         ));
 
@@ -282,4 +280,7 @@ public class UsageManager<T>(
             throw usage;
         }
     }
+
+    public Task<Dictionary<string, long>> GetConsumition(string Id, DateTime? at = null)
+    => usageRepository.GetConsumition(Id, at ?? DateTime.UtcNow);
 }

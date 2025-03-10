@@ -4,6 +4,7 @@ using OnLimit;
 using OnLimit.DependencyInjection;
 using OnLimit.Interfaces;
 using OnLimit.MongoDB;
+using OnLimit.Postgres;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddNpgsqlDataSource("Server=localhost;Port=5432;Database=omem-db;User Id=postgres;Password=postgres;");
 
 var clientSettings = MongoClientSettings.FromUrl(new("mongodb://admin:examplepassword@localhost:27017/"));
 
@@ -44,7 +47,7 @@ builder.Services
         ]
 
     })
-    .AddMongoDB()
+    .AddPostgres()
 ;
 
 var app = builder.Build();
@@ -68,6 +71,21 @@ app.MapGet("/set-plan", async (
     return "ok";
 });
 
+app.MapGet("/actual", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    return await usageManager.GetActualPlan("123");
+});
+
+
+app.MapGet("/used", (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    return usageManager.GetConsumition("123");
+});
+
 app.MapGet("/plans", (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
@@ -81,17 +99,22 @@ app.MapGet("/consume", async (
 {
     var actualUsers = 123;
 
-    await usageManager.Usage("123", [
+    var res = await usageManager.Usage("123", [
         new(x => x.Users, Count: 500, Used: actualUsers),
         new(x => x.Tokens, 500),
         new(x => x.CanUse),
     ]);
 
+    if (res is not null)
+    {
+        return Results.BadRequest(res);
+    }
+
     await usageManager.Consume("123", [
         new(x => x.Tokens, 500)
     ]);
 
-    return "ok";
+    return Results.Ok(new { message = "ok" });
 });
 
 app.Run();

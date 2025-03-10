@@ -89,6 +89,11 @@ public class MongoUsageRepository(
         return result;
     }
 
+    public Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task Increment(IncrementUsageInput input)
     {
         var now = input.At ?? DateTime.UtcNow;
