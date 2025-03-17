@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using OnLimit.Configuration;
 using OnLimit.Entities;
+using OnLimit.FieldConfigs;
 using OnLimit.Interfaces;
 using OnLimit.Manager.Impl.Dtos;
 
@@ -65,7 +66,21 @@ public class UsageManager<T>(
                 };
             }
         }
-
+        else if (planLimit is RangedField f)
+        {
+            if (f.MaxValue < requiredAmmount)
+            {
+                return new(
+                    Plan: planName,
+                    Field: field
+                    )
+                {
+                    Requested = requiredAmmount,
+                    Limit = f.MaxValue,
+                    Used = used
+                };
+            }
+        }
         else if (planLimit is decimal planLimitDecimal)
         {
             if (planLimitDecimal < requiredAmmount)

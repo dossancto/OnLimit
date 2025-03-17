@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using OnLimit;
 using OnLimit.DependencyInjection;
+using OnLimit.FieldConfigs;
 using OnLimit.Interfaces;
-using OnLimit.MongoDB;
 using OnLimit.Postgres;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddNpgsqlDataSource("Server=localhost;Port=5432;Database=omem-db;User Id=postgres;Password=postgres;");
+builder.Services.AddNpgsqlDataSource("Server=localhost;Port=5432;Database=onlimit;User Id=postgres;Password=postgres;");
 
 var clientSettings = MongoClientSettings.FromUrl(new("mongodb://admin:examplepassword@localhost:27017/"));
 
@@ -30,8 +30,9 @@ builder.Services
             Limit = new()
             {
                 Tokens = 1000,
+                Money = new(0, 100),
                 Users = 10,
-                CanUse = false
+                CanUse = true
             }
           },
 
@@ -40,6 +41,7 @@ builder.Services
             Limit = new()
             {
                 Tokens = 5000,
+                Money = new(0, 200),
                 CanUse = true,
                 Users = 10
             }
@@ -75,7 +77,20 @@ app.MapGet("/actual", async (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
 {
-    return await usageManager.GetActualPlan("123");
+    var res = await usageManager.GetActualPlan("123");
+
+    if (res is null)
+    {
+        return Results.NoContent();
+    }
+
+    var formatedResult = new
+    {
+        res.Plan,
+        res.CreatedAt,
+    };
+
+    return Results.Ok(formatedResult);
 });
 
 
@@ -93,14 +108,14 @@ app.MapGet("/plans", (
     return usageManager.ListPlans();
 });
 
-app.MapGet("/consume", async (
+app.MapGet("/consumed", async (
       [FromServices] IUsageManager<MyPlan> usageManager
       ) =>
 {
     var actualUsers = 123;
 
     var res = await usageManager.Usage("123", [
-        new(x => x.Users, Count: 500, Used: actualUsers),
+        new(x => x.Users, Count: 1, Used: actualUsers),
         new(x => x.Tokens, 500),
         new(x => x.CanUse),
     ]);
@@ -111,7 +126,31 @@ app.MapGet("/consume", async (
     }
 
     await usageManager.Consume("123", [
-        new(x => x.Tokens, 500)
+        new(x => x.Tokens, -500)
+    ]);
+
+    return Results.Ok(new { message = "ok" });
+});
+
+app.MapGet("/consume", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    var res = await usageManager.Usage("123", [
+        new(x => x.Users, Count: 1),
+        new(x => x.Tokens, 500),
+        new(x => x.Money, 33),
+        new(x => x.CanUse),
+    ]);
+
+    if (res is not null)
+    {
+        return Results.BadRequest(res);
+    }
+
+    await usageManager.Consume("123", [
+        new(x => x.Money, 33),
+        // new(x => x.Users, 1),
     ]);
 
     return Results.Ok(new { message = "ok" });
@@ -121,6 +160,9 @@ app.Run();
 
 class MyPlan
 {
+    [IncrementalUsageLimit]
+    public RangedField Money { get; set; } = new();
+
     public long Users { get; set; }
 
     [IncrementalUsageLimit]

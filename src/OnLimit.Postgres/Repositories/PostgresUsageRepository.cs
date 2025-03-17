@@ -1,9 +1,9 @@
-using System.Text.Json;
 using Dapper;
 using Npgsql;
 using OnLimit.Entities;
 using OnLimit.Interfaces;
 using OnLimit.Manager.Impl.Dtos;
+using OnLimit.Postgres.Entities;
 
 namespace OnLimit.Postgres.Repositories;
 
@@ -58,20 +58,22 @@ public class PostgresUsageRepository(
 
         var SQL = $"SELECT * FROM \"{config.LinkTable}\" WHERE \"UserId\" = @id AND \"Date\" = @date;";
 
-        var res = await connection.QueryFirstOrDefaultAsync<UsageUserPlans>(SQL, new
+        var res = await connection.QueryFirstOrDefaultAsync<PostgresUsageUserPlans>(SQL, new
         {
             id = Id,
             date = date
         });
 
-        return res;
+        return res?.MapToDomain();
     }
 
     public async Task<UsageUserPlans?> GetLatestUserPlan(string Id)
     {
         var query = $"SELECT * FROM \"{config.LinkTable}\" WHERE \"UserId\" = @id ORDER BY \"CreatedAt\" DESC LIMIT 1;";
 
-        return await connection.QueryFirstOrDefaultAsync<UsageUserPlans>(query, new { id = Id });
+        var res = await connection.QueryFirstOrDefaultAsync<PostgresUsageUserPlans>(query, new { id = Id });
+
+        return res?.MapToDomain();
     }
 
     public Task<UsageUserPlans?> GetLatestUserPlan(string Id, DateTime? at = null)
@@ -129,9 +131,9 @@ public class PostgresUsageRepository(
     {
         var now = at ?? DateTime.Now;
 
-        var model = new UsageUserPlans()
+        var model = new PostgresUsageUserPlans()
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             UserId = orgId,
             CreatedAt = now,
             Plan = plan,
