@@ -32,7 +32,7 @@ builder.Services
                 Tokens = 1000,
                 Money = new(0, 100),
                 Users = 10,
-                CanUse = true
+                CanUse = false
             }
           },
 
@@ -93,6 +93,30 @@ app.MapGet("/actual", async (
     return Results.Ok(formatedResult);
 });
 
+app.MapGet("/limits", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    return await usageManager.GetLimits("123");
+});
+
+app.MapGet("/limits-check", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    return await usageManager.Usage("123", [
+        new(x => x.Budget, 100)
+    ]);
+});
+
+app.MapGet("/limits-inc", async (
+      [FromServices] IUsageManager<MyPlan> usageManager
+      ) =>
+{
+    await usageManager.IncreaseLimit("123", [
+        new(x => x.Budget, 100)
+    ]);
+});
 
 app.MapGet("/used", (
       [FromServices] IUsageManager<MyPlan> usageManager
@@ -137,10 +161,10 @@ app.MapGet("/consume", async (
       ) =>
 {
     var res = await usageManager.Usage("123", [
-        new(x => x.Users, Count: 1),
-        new(x => x.Tokens, 500),
-        new(x => x.Money, 33),
-        new(x => x.CanUse),
+        // new(x => x.Users, Count: 1),
+        // new(x => x.Tokens, 500),
+        new(x => x.Budget, 33),
+        // new(x => x.CanUse),
     ]);
 
     if (res is not null)
@@ -149,7 +173,7 @@ app.MapGet("/consume", async (
     }
 
     await usageManager.Consume("123", [
-        new(x => x.Money, 33),
+        new(x => x.Budget, 33),
         // new(x => x.Users, 1),
     ]);
 
@@ -160,12 +184,15 @@ app.Run();
 
 class MyPlan
 {
-    [IncrementalUsageLimit]
+    // [IncrementalUsageLimit]
     public RangedField Money { get; set; } = new();
+
+    // [IncrementalUsageLimit]
+    public IncrementalField Budget { get; set; } = new(0);
 
     public long Users { get; set; }
 
-    [IncrementalUsageLimit]
+    // [IncrementalUsageLimit]
     public long Tokens { get; set; }
 
     [UsageSwitch]

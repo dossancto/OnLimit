@@ -39,6 +39,7 @@ public class UsageManager<T>(
         LimitItemMetadata order,
         IDictionary<string, object> plan,
         long? consumition,
+        long? incrementalField,
         string planName
         )
     {
@@ -66,6 +67,27 @@ public class UsageManager<T>(
                 };
             }
         }
+        else if (planLimit is IncrementalField incrementalF)
+        {
+            if (incrementalField is not null)
+            {
+                if (incrementalField >= requiredAmmount)
+                {
+                    return null;
+                }
+            }
+
+            return new(
+                Plan: planName,
+                Field: field
+                )
+            {
+                Requested = requiredAmmount,
+                Limit = incrementalF.MaxValue ?? incrementalF.FallbackValue,
+                IsRanged = order.IsRanged,
+                Used = used
+            };
+        }
         else if (planLimit is RangedField f)
         {
             if (f.MaxValue < requiredAmmount)
@@ -77,6 +99,7 @@ public class UsageManager<T>(
                 {
                     Requested = requiredAmmount,
                     Limit = f.MaxValue,
+                    IsRanged = order.IsRanged,
                     Used = used
                 };
             }
@@ -92,7 +115,7 @@ public class UsageManager<T>(
                 {
                     Requested = requiredAmmount,
                     Limit = planLimitDecimal,
-                    IsIncremental = order.IsIncremental,
+                    IsRanged = order.IsRanged,
                     Used = used
                 };
             }
@@ -108,7 +131,7 @@ public class UsageManager<T>(
                 {
                     Requested = requiredAmmount,
                     Limit = planLimitDouble,
-                    IsIncremental = order.IsIncremental,
+                    IsRanged = order.IsRanged,
                     Used = used
                 };
             }
@@ -124,7 +147,7 @@ public class UsageManager<T>(
                 {
                     Requested = requiredAmmount,
                     Limit = planLimitInt,
-                    IsIncremental = order.IsIncremental,
+                    IsRanged = order.IsRanged,
                     Used = used
                 };
             }
@@ -157,6 +180,7 @@ public class UsageManager<T>(
         var now = at ?? DateTime.UtcNow;
 
         Dictionary<string, long>? consumition = null;
+        Dictionary<string, long>? incrementalLimits = null;
 
         var actualPlan = await GetActualPlan(Id, now);
 
@@ -186,22 +210,35 @@ public class UsageManager<T>(
           .Select(GetFieldName)
           .ToList();
 
-        var incrementalLimitFields = limitFields
+        var fillConsumition = limitFields
+          .Where(x => x.IsRanged || x.IsIncremental)
+          .ToList();
+
+        var fillLimits = limitFields
           .Where(x => x.IsIncremental is true)
           .ToList();
 
-        if (incrementalLimitFields.Count is not 0)
+        if (fillLimits.Count is not 0)
+        {
+            incrementalLimits = await usageRepository.GetLimits(Id);
+        }
+
+        if (fillConsumition.Count is not 0)
         {
             consumition = await usageRepository.GetConsumition(Id, now);
         }
 
-        var res = limitFields.Select(x => Process(
-            at: at,
-            order: x,
-            plan: plan,
-            consumition: consumition?.GetValueOrDefault(x.FieldName),
-            planName: targetPlan
-        ));
+        var res = limitFields.Select(x =>
+        {
+            return Process(
+                        at: at,
+                        order: x,
+                        plan: plan,
+                        consumition: consumition?.GetValueOrDefault(x.FieldName),
+                        incrementalField: incrementalLimits?.GetValueOrDefault(x.FieldName),
+                        planName: targetPlan
+                    );
+        });
 
         var failedItems = res
                         .Where(x => x is not null)
@@ -235,19 +272,52 @@ public class UsageManager<T>(
         return (member, propertyInfo);
     }
 
+    public static bool IsExpressionOfType(Expression<Func<T, object>> expression, Type targetType)
+    {
+        // Get the body of the expression
+        Expression body = expression.Body;
+
+        // Handle conversions (e.g., boxing of value types to object)
+        if (body is UnaryExpression unaryExpression)
+        {
+            body = unaryExpression.Operand;
+        }
+
+        // Check if the expression is a member access and matches the target type
+        Console.WriteLine(new
+        {
+            Ti = body.Type.ToString()
+        });
+
+        if (body is MemberExpression memberExpression)
+        {
+            var comp = memberExpression.Type == targetType;
+            return comp;
+        }
+
+        return false;
+    }
+
     private LimitItemMetadata GetFieldName(CheckPlanUsageInput<T> item)
     {
         var (member, propertyInfo) = GetMemberExpression(item.expr);
 
         var fieldName = member.Member.Name;
 
-        var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>();
-        var usageSwitch = propertyInfo.GetCustomAttribute<UsageSwitchAttribute>();
+        var isIncremental = IsExpressionOfType(item.expr, typeof(IncrementalField));
+
+        var isRanged = IsExpressionOfType(item.expr, typeof(RangedField));
+
+        // var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>();
+        // var usageSwitch = propertyInfo.GetCustomAttribute<UsageSwitchAttribute>();
 
         return new(
                 FieldName: fieldName,
-                IsIncremental: incrementalUsage is not null,
-                IsUsageSwitch: usageSwitch is not null
+                IsIncremental: isIncremental,
+                IsRanged: isRanged,
+                IsUsageSwitch: false
+            // IsIncremental: incrementalUsage is not null,
+            // IsUsageSwitch: usageSwitch is not null
             )
         {
             Count = item.Count,
@@ -266,7 +336,9 @@ public class UsageManager<T>(
                {
                    var (member, propertyInfo) = GetMemberExpression(x.expr);
 
-                   var incrementalUsage = propertyInfo.GetCustomAttribute<IncrementalUsageLimitAttribute>() is not null;
+                   var incrementalUsage = IsExpressionOfType(x.expr, typeof(RangedField))
+                   || IsExpressionOfType(x.expr, typeof(IncrementalField))
+                   ;
 
                    return (x.IncrementBy, member, incrementalUsage);
                })
@@ -299,4 +371,38 @@ public class UsageManager<T>(
 
     public Task<Dictionary<string, long>> GetConsumition(string Id, DateTime? at = null)
     => usageRepository.GetConsumition(Id, at ?? DateTime.UtcNow);
+
+    public Task<Dictionary<string, long>> GetLimits(string Id)
+    => usageRepository.GetLimits(Id);
+
+    public async Task IncreaseLimit(string userId, List<IncrementLimitInput<T>> Items, DateTime? At = null)
+    {
+        var items = new IncrementLimitRequest(
+               Id: userId,
+
+               Items: Items
+               .Select(x =>
+               {
+                   var (member, propertyInfo) = GetMemberExpression(x.expr);
+
+                   var incrementalUsage = IsExpressionOfType(x.expr, typeof(IncrementalField));
+
+                   return (x.IncrementBy, member, incrementalUsage);
+               })
+               .Where(x => x.incrementalUsage is true)
+               .Select(x => new IncrementLimitRequest.ItemDto(
+                 x.member.Member.Name,
+                 x.IncrementBy
+                 )).ToList(),
+
+               At: At
+         );
+
+        if (items.Items.Count is 0)
+        {
+            return;
+        }
+
+        await usageRepository.IncrementLimit(items);
+    }
 }

@@ -94,6 +94,11 @@ public class MongoUsageRepository(
         throw new NotImplementedException();
     }
 
+    public Task<Dictionary<string, long>> GetLimits(string orgId)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task Increment(IncrementUsageInput input)
     {
         var now = input.At ?? DateTime.UtcNow;
@@ -117,6 +122,11 @@ public class MongoUsageRepository(
 
         var result = await ConsumitionCollection
           .UpdateManyAsync(filter, update, options);
+    }
+
+    public Task IncrementLimit(IncrementLimitRequest input)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task SetPlan(string orgId, string plan, DateTime? at = null)

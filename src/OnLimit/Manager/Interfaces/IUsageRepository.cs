@@ -40,9 +40,21 @@ public interface IUsageRepository
     Task<Dictionary<string, long>> GetConsumition(string orgId, DateTime at);
 
     /// <summarry>
+    /// Get Increased Limits on a Configuration Table
+    /// </summarry>
+    /// <param name="orgId">User id as key</param>
+    Task<Dictionary<string, long>> GetLimits(string orgId);
+
+    /// <summarry>
     /// Increment the usage of some items
     /// </summarry>
     /// <param name="input">Data used to increment the plans</param>
     Task Increment(IncrementUsageInput input);
+
+    /// <summarry>
+    /// Increment the usage limit from some user. This only works for `IncrementField` fields.
+    /// </summarry>
+    /// <param name="input">Data used to increment the field</param>
+    Task IncrementLimit(IncrementLimitRequest input);
 }
 

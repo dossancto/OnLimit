@@ -12,9 +12,13 @@ public interface IUsageManager<T> where T : notnull, new()
 
     Task<Dictionary<string, long>> GetConsumition(string Id, DateTime? at = null);
 
+    Task<Dictionary<string, long>> GetLimits(string Id);
+
     Task SetPlan(string orgId, string plan, DateTime? at = null);
 
     Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null);
+
+    Task IncreaseLimit(string userId, List<IncrementLimitInput<T>> Items, DateTime? At = null);
 
     UsagePlanItem<T>[] ListPlans();
 }

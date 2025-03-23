@@ -12,6 +12,7 @@ public class OutOfUsageException(params OutOfUsageException.OutOfUsageItem[] ite
         object Limit = default!,
         long Used = 0,
         bool IsIncremental = false,
+        bool IsRanged = false,
         bool IsUsageSwitch = false
       );
 }

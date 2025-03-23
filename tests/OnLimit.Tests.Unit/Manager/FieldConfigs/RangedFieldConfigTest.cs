@@ -6,7 +6,6 @@ namespace OnLimit.Tests.Unit.Manager.FieldConfigs;
 
 public class RangedConfigPlan
 {
-    [IncrementalUsageLimit]
     public RangedField Tokens { get; set; } = new();
 }
 

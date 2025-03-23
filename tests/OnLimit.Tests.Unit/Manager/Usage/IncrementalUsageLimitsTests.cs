@@ -1,11 +1,11 @@
 using OnLimit.Entities;
+using OnLimit.FieldConfigs;
 
 namespace OnLimit.Tests.Unit.Manager.Usage;
 
 public class IncrementalPlan
 {
-    [IncrementalUsageLimit]
-    public long Tokens { get; set; }
+    public RangedField Tokens { get; set; } = new();
 }
 
 public class IncrementalUsageLimitsTests
@@ -16,7 +16,7 @@ public class IncrementalUsageLimitsTests
         var usageRepositoy = Substitute.For<IUsageRepository>();
 
         usageRepositoy
-          .GetLatestUserPlan(Arg.Any<string>(), Arg.Any<DateTime?>())
+          .GetLatestUserPlan(Arg.Any<string>())
           .Returns(new UsageUserPlans()
           {
               Plan = "FREE"
@@ -37,14 +37,14 @@ public class IncrementalUsageLimitsTests
               new("FREE",
                 new Dictionary<string, object>()
                   {
-                    ["Tokens"] = 10
+                    ["Tokens"] = new RangedField(0, 10)
                   }
                 )
             ],
             Plan: [
               new("FREE", new()
                 {
-                    Tokens = 10
+                    Tokens = new(0, 10)
                 })
             ]
         );
@@ -64,7 +64,7 @@ public class IncrementalUsageLimitsTests
         var usageRepositoy = Substitute.For<IUsageRepository>();
 
         usageRepositoy
-          .GetLatestUserPlan(Arg.Any<string>(), Arg.Any<DateTime?>())
+          .GetLatestUserPlan(Arg.Any<string>())
           .Returns(new UsageUserPlans()
           {
               Plan = "FREE"
@@ -85,14 +85,14 @@ public class IncrementalUsageLimitsTests
               new("FREE",
                 new Dictionary<string, object>()
                   {
-                    ["Tokens"] = 10
+                    ["Tokens"] = new RangedField(0, 10)
                   }
                 )
             ],
             Plan: [
               new("FREE", new()
                 {
-                    Tokens = 10
+                    Tokens = new(0, 10)
                 })
             ]
         );
@@ -111,7 +111,7 @@ public class IncrementalUsageLimitsTests
         ex.Items.First().Field.ShouldBe(nameof(IncrementalPlan.Tokens));
         ex.Items.First().Limit.ShouldBe(10);
         ex.Items.First().Requested.ShouldBe(14);
-        ex.Items.First().IsIncremental.ShouldBe(true);
+        ex.Items.First().IsRanged.ShouldBe(true);
         ex.Items.First().IsUsageSwitch.ShouldBe(false);
     }
 
@@ -121,7 +121,7 @@ public class IncrementalUsageLimitsTests
         var usageRepositoy = Substitute.For<IUsageRepository>();
 
         usageRepositoy
-          .GetLatestUserPlan(Arg.Any<string>(), Arg.Any<DateTime?>())
+          .GetLatestUserPlan(Arg.Any<string>())
           .Returns(new UsageUserPlans()
           {
               Plan = "FREE"
@@ -141,14 +141,14 @@ public class IncrementalUsageLimitsTests
               new("FREE",
                 new Dictionary<string, object>()
                   {
-                    ["Tokens"] = 10
+                    ["Tokens"] = new RangedField(0, 10)
                   }
                 )
             ],
             Plan: [
               new("FREE", new()
                 {
-                    Tokens = 10
+                    Tokens = new(0, 10)
                 })
             ]
         );
