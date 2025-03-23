@@ -16,7 +16,7 @@ public class ListPlansTest
             FallbackPlan: "FREE",
             PlanDict: [],
             Plan: [
-            new("FREE", new()
+            new("FREE", 15, new()
               {
                   Users = 10
               })
@@ -30,5 +30,6 @@ public class ListPlansTest
         plans.ShouldHaveSingleItem();
 
         plans[0].Plan.ShouldBe("FREE");
+        plans[0].Price.ShouldBe(15);
     }
 }

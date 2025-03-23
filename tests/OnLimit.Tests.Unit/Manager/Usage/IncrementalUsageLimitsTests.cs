@@ -42,7 +42,7 @@ public class IncrementalUsageLimitsTests
                 )
             ],
             Plan: [
-              new("FREE", new()
+              new("FREE",0, new()
                 {
                     Tokens = new(0, 10)
                 })
@@ -90,7 +90,7 @@ public class IncrementalUsageLimitsTests
                 )
             ],
             Plan: [
-              new("FREE", new()
+              new("FREE",0, new()
                 {
                     Tokens = new(0, 10)
                 })
@@ -146,7 +146,7 @@ public class IncrementalUsageLimitsTests
                 )
             ],
             Plan: [
-              new("FREE", new()
+              new("FREE",0, new()
                 {
                     Tokens = new(0, 10)
                 })

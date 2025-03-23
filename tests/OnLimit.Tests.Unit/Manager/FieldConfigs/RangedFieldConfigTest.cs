@@ -43,7 +43,7 @@ public class RangedFieldConfigTest
                 )
             ],
             Plan: [
-              new("FREE", new()
+              new("FREE", 0, new()
                 {
                     Tokens = new(10, 1000)
                 })
@@ -99,7 +99,7 @@ public class RangedFieldConfigTest
                 )
             ],
             Plan: [
-              new("FREE", new()
+              new("FREE",0, new()
                 {
                     Tokens = new(10, 1000)
                 })

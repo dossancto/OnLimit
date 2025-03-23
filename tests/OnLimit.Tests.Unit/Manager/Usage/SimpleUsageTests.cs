@@ -32,7 +32,7 @@ public class SimpleUsageTests
               )
             ],
             Plan: [
-            new("FREE", new()
+            new("FREE",0, new()
               {
                   Users = 10
               })
@@ -69,7 +69,7 @@ public class SimpleUsageTests
               )
             ],
             Plan: [
-            new("FREE", new()
+            new("FREE",0, new()
               {
                   Users = 10
               })
@@ -117,7 +117,7 @@ public class SimpleUsageTests
               )
             ],
             Plan: [
-            new("FREE", new()
+            new("FREE",0, new()
               {
                   Users = 10
               })
