@@ -60,7 +60,7 @@ public class PostgresUsageRepository(
 
         var res = await connection.QueryFirstOrDefaultAsync<PostgresUsageUserPlans>(SQL, new
         {
-            id = Guid.Parse(Id),
+            id = Id,
             date = date
         });
 
