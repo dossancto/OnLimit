@@ -27,6 +27,7 @@ CREATE TABLE plan_usage_link(
   "Plan" VARCHAR(64) NOT NULL,
   "UserId" VARCHAR(50) NOT NULL,
   "Date" VARCHAR(10) NOT NULL,
+  "ExternalPaymentId" VARCHAR(300),
   "CreatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
