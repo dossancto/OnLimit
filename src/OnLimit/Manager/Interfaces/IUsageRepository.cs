@@ -11,7 +11,7 @@ public interface IUsageRepository
     /// <param name="orgId">User id as key</param>
     /// <param name="plan">The plan name to be set</param>
     /// <param name="at">The moment the plan was set. Null for now</param>
-    Task SetPlan(string orgId, string plan, DateTime? at = null);
+    Task SetPlan(string orgId, string plan, DateTime? at = null, string? externalPaymentId = null);
 
     /// <summarry>
     /// Get the latest plan set on a Configuration Table

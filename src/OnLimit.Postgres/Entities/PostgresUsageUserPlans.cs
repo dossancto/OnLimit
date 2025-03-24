@@ -10,6 +10,8 @@ public class PostgresUsageUserPlans
 
     public string UserId { get; set; } = string.Empty;
 
+    public string? ExternalPaymentId { get; set; }
+
     public string Date { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
@@ -19,6 +21,7 @@ public class PostgresUsageUserPlans
       {
           Id = Guid.Parse(p.Id),
           UserId = p.UserId,
+          ExternalPaymentId = p.ExternalPaymentId,
           CreatedAt = p.CreatedAt,
           Date = p.Date,
           Plan = p.Plan
@@ -29,6 +32,7 @@ public class PostgresUsageUserPlans
       {
           Id = Id.ToString(),
           UserId = UserId,
+          ExternalPaymentId = ExternalPaymentId,
           CreatedAt = CreatedAt,
           Date = Date,
           Plan = Plan

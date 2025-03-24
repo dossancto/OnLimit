@@ -60,7 +60,7 @@ public class PostgresUsageRepository(
 
         var res = await connection.QueryFirstOrDefaultAsync<PostgresUsageUserPlans>(SQL, new
         {
-            id = Id,
+            id = Guid.Parse(Id),
             date = date
         });
 
@@ -127,7 +127,7 @@ public class PostgresUsageRepository(
         }
     }
 
-    public async Task SetPlan(string orgId, string plan, DateTime? at = null)
+    public async Task SetPlan(string orgId, string plan, DateTime? at = null, string? externalPaymentId = null)
     {
         var now = at ?? DateTime.Now;
 
@@ -137,12 +137,13 @@ public class PostgresUsageRepository(
             UserId = orgId,
             CreatedAt = now,
             Plan = plan,
+            ExternalPaymentId = externalPaymentId,
             Date = UsageUserPlans.MapDate(now),
         };
 
         var SQL = $@"INSERT INTO ""{config.LinkTable}""
-          (""Id"", ""UserId"", ""Plan"", ""Date"", ""CreatedAt"")
-          VALUES (@Id, @UserId, @Plan, @Date, @CreatedAt);
+          (""Id"", ""UserId"", ""Plan"", ""Date"", ""CreatedAt"", ""ExternalPaymentId"")
+          VALUES (@Id, @UserId, @Plan, @Date, @CreatedAt, @ExternalPaymentId);
         ";
 
         await connection.ExecuteAsync(SQL, model);

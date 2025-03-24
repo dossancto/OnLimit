@@ -10,6 +10,8 @@ public class UsageUserPlans
 
     public string Date { get; set; } = string.Empty;
 
+    public string? ExternalPaymentId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public static string MapDate(DateTime date)

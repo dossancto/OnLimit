@@ -129,7 +129,7 @@ public class MongoUsageRepository(
         throw new NotImplementedException();
     }
 
-    public async Task SetPlan(string orgId, string plan, DateTime? at = null)
+    public async Task SetPlan(string orgId, string plan, DateTime? at = null, string? externalPaymentId = null)
     {
         var now = at ?? DateTime.Now;
 
@@ -138,6 +138,7 @@ public class MongoUsageRepository(
             Id = ObjectId.GenerateNewId().ToString(),
             UserId = orgId,
             CreatedAt = now,
+            ExternalPaymentId = externalPaymentId,
             Plan = plan,
             Date = UsageUserPlans.MapDate(now),
         };

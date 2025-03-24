@@ -22,7 +22,7 @@ public class UsageManager<T>(
     public UsagePlanItem<T>[] ListPlans()
     => config.Plan;
 
-    public async Task SetPlan(string orgId, string plan, DateTime? at = null)
+    public async Task SetPlan(string orgId, string plan, DateTime? at = null, string? externalPaymentId = null)
     {
         var validPlan = config.PlanDict.FirstOrDefault(x => x.Plan == plan) is not null;
 
@@ -31,7 +31,7 @@ public class UsageManager<T>(
             throw new Exception($"Invalid Plan: {plan}");
         }
 
-        await usageRepository.SetPlan(orgId, plan, at);
+        await usageRepository.SetPlan(orgId, plan, at, externalPaymentId);
     }
 
     private OutOfUsageException.OutOfUsageItem? Process(

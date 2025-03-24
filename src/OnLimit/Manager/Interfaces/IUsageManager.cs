@@ -14,7 +14,7 @@ public interface IUsageManager<T> where T : notnull, new()
 
     Task<Dictionary<string, long>> GetLimits(string Id);
 
-    Task SetPlan(string orgId, string plan, DateTime? at = null);
+    Task SetPlan(string orgId, string plan, DateTime? at = null, string? externalPaymentId = null);
 
     Task Consume(string UserId, List<ConsumeUsageInput<T>> Items, DateTime? At = null);
 

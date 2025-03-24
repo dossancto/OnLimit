@@ -19,7 +19,14 @@ public class ListPlansTest
             new("FREE", 15, new()
               {
                   Users = 10
-              })
+              }),
+            new("FREE2", 15)
+            {
+              Limit = new()
+                {
+                  Users = 16
+                }
+              },
             ]
         );
 
@@ -27,7 +34,7 @@ public class ListPlansTest
 
         var plans = manager.ListPlans();
 
-        plans.ShouldHaveSingleItem();
+        plans.Count().ShouldBe(2);
 
         plans[0].Plan.ShouldBe("FREE");
         plans[0].Price.ShouldBe(15);
