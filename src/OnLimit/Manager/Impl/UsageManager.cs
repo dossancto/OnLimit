@@ -283,12 +283,6 @@ public class UsageManager<T>(
             body = unaryExpression.Operand;
         }
 
-        // Check if the expression is a member access and matches the target type
-        Console.WriteLine(new
-        {
-            Ti = body.Type.ToString()
-        });
-
         if (body is MemberExpression memberExpression)
         {
             var comp = memberExpression.Type == targetType;

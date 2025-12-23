@@ -12,8 +12,10 @@ public class MyPlan
 {
     public long Users { get; set; }
 
-    [IncrementalUsageLimit]
-    public long Tokens { get; set; }
+    // [IncrementalUsageLimit]
+    public RangedField Money { get; set; } = new();
+
+    public IncrementalField Tokens { get; set; }
 
     [UsageSwitch]
     public bool CanUse { get; set; }
@@ -32,6 +34,7 @@ builder.Services
             Limit = new()
             {
                 Tokens = 1000,
+                Money = new(0, 100),
                 Users = 10,
                 CanUse = false
             }
@@ -42,12 +45,12 @@ builder.Services
             Limit = new()
             {
                 Tokens = 5000,
+                Money = new(0, 200),
                 CanUse = true,
                 Users = 10
             }
           }
         ]
-
     })
     .AddMongoDB();
 ```
