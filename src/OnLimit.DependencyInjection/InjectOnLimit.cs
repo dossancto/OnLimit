@@ -1,5 +1,7 @@
 using System.Reflection;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using OnLimit.Configuration;
 using OnLimit.Entities;
 using OnLimit.Interfaces;
@@ -41,9 +43,9 @@ public static class InjectOnLimit
         foreach (var property in properties)
         {
             var value = property.GetValue(source);
-            
-            if(value is null) continue;
-            
+
+            if (value is null) continue;
+
             dictionary.Add(property.Name, value);
         }
 
@@ -64,7 +66,7 @@ public record OnLimitServiceConfiguration<T>(
 
 }
 
-public record OnLimitServicesBuilder(IServiceCollection services)
+public record OnLimitServicesBuilder(IServiceCollection Services)
 {
 
 }

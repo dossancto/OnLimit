@@ -12,10 +12,9 @@ public static class InjectOnLimitMongoDB
         OnLimitMongoDBConfiguration? config = null
       )
     {
-        builder.services.AddSingleton<OnLimitMongoDBConfiguration>(config ?? new());
-        builder.services.AddSingleton<IUsageRepository, MongoUsageRepository>();
+        builder.Services.AddSingleton<OnLimitMongoDBConfiguration>(config ?? new());
+        builder.Services.AddSingleton<IUsageRepository, MongoUsageRepository>();
 
         return builder;
     }
 }
-

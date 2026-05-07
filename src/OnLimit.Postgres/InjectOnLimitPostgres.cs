@@ -12,8 +12,8 @@ public static class InjectOnLimitPostgres
         OnLimitPostgresConfig? config = null
       )
     {
-        builder.services.AddSingleton<OnLimitPostgresConfig>(config ?? new());
-        builder.services.AddTransient<IUsageRepository, PostgresUsageRepository>();
+        builder.Services.AddSingleton<OnLimitPostgresConfig>(config ?? new());
+        builder.Services.AddTransient<IUsageRepository, PostgresUsageRepository>();
 
         return builder;
     }
