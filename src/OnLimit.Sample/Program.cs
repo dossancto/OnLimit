@@ -177,15 +177,12 @@ app.Run();
 
 class MyPlan
 {
-    // [IncrementalUsageLimit]
     public RangedField Money { get; set; } = new();
 
-    // [IncrementalUsageLimit]
     public IncrementalField Budget { get; set; } = new(0);
 
     public long Users { get; set; }
 
-    // [IncrementalUsageLimit]
     public long Tokens { get; set; }
 
     [UsageSwitch]
