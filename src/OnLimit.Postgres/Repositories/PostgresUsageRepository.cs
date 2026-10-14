@@ -56,7 +56,7 @@ public class PostgresUsageRepository(
         var now = at ?? DateTime.Now;
         var date = UsageUserPlans.MapDate(now);
 
-        var SQL = $"SELECT * FROM \"{config.LinkTable}\" WHERE \"UserId\" = @id AND \"Date\" = @date;";
+        var SQL = $"SELECT * FROM \"{config.LinkTable}\" WHERE \"UserId\" = @id AND \"Date\" = @date order by \"CreatedAt\" desc limit 1;";
 
         var res = await connection.QueryFirstOrDefaultAsync<PostgresUsageUserPlans>(SQL, new
         {
